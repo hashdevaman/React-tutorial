@@ -1,51 +1,45 @@
 import * as React from "react";
 
-// Initial state of timer
 const initialState = {
-  isRunning: false,
-  timer: 0
-};
+  todo: []
+}
 
-// Adding reducer function
 const reducer = (state, action) => {
-  // console.log("action here", action);
 
-  switch (action.type) {
-    case "start":
-      return { ...state, isRunning: true };
-    case "stop":
-      return { ...state, isRunning: false };
-    case "reset":
-      return { isRunning: false, timer: 0 };
-    case "tick":
-      return { ...state, timer: state.timer + 1 };
+  switch(action.type) {
+    case 'add':
+      return {...state, todo: [...state.todo, action.todoVal]};
+    case 'clear':
+      return {...state, todo: []};
     default:
-      throw new Error();
+      throw new Error("Nothing to add");
   }
-};
+}
 
 export default function App() {
+  
+  const inputVal = React.useRef('');
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const intervalRef = React.useRef(0);
 
   React.useEffect(() => {
-    if (!state.isRunning) {
-      return;
-    }
-    intervalRef.current = setInterval(() => dispatch({ type: "tick" }), 1000);
-    return () => {
-      clearInterval(intervalRef.current);
-      intervalRef.current = 0;
-    };
-  }, [state.isRunning]);
+    inputVal.current.value = '';
+  }, [state])
 
   return (
     <div>
-      <h2>React Stop Watch</h2>
-      <h3>{state.timer}s</h3>
-      <button onClick={() => dispatch({ type: "start" })}>Start</button>
-      <button onClick={() => dispatch({ type: "stop" })}>Stop</button>
-      <button onClick={() => dispatch({ type: "reset" })}>Reset</button>
+      <h2>React Todo Application</h2>
+      <ul>
+        {state.todo?.length > 0 && state.todo?.map((val, key) => {
+          return(<li key={key}>{val}</li>)
+        })}
+      </ul>
+      <div style={{padding: "10px"}}>
+        <input type="text" name="todo" ref={inputVal} />
+        <button onClick={() => dispatch({type: 'add', todoVal: inputVal.current.value})}>Add Todo</button>
+      </div>
+      <div style={{padding: "10px"}}>
+        <button style={{padding: "5px", backgroundColor: "red", color:"#ffff"}} onClick={() => dispatch({type: 'clear'})}>Clear Todo</button>
+      </div>
     </div>
   );
 }
