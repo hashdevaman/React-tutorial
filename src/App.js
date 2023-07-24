@@ -1,51 +1,43 @@
 import * as React from "react";
 
-// Initial state of timer
-const initialState = {
-  isRunning: false,
-  timer: 0
-};
-
-// Adding reducer function
-const reducer = (state, action) => {
-  // console.log("action here", action);
-
-  switch (action.type) {
-    case "start":
-      return { ...state, isRunning: true };
-    case "stop":
-      return { ...state, isRunning: false };
-    case "reset":
-      return { isRunning: false, timer: 0 };
-    case "tick":
-      return { ...state, timer: state.timer + 1 };
-    default:
-      throw new Error();
-  }
-};
-
 export default function App() {
-  const [state, dispatch] = React.useReducer(reducer, initialState);
-  const intervalRef = React.useRef(0);
+
+  const [timer, setTimer] = React.useState(0);
+  const [status, setStatus] = React.useState(2); // 1 start, 2 stop, 3 reset 
+  const [laps, setLaps] = React.useState([]);
+  const interval = React.useRef(0); 
 
   React.useEffect(() => {
-    if (!state.isRunning) {
-      return;
+    if(status === 1) {
+      interval.current = setInterval(() => {
+        setTimer(prev => prev + 1);
+      }, 1000)
+    } else if(status === 2) {
+      clearInterval(interval.current);
+      interval.current = 0;
+    } else if(status === 3) {
+      clearInterval(interval.current);
+      interval.current = 0;
+      setTimer(0);
     }
-    intervalRef.current = setInterval(() => dispatch({ type: "tick" }), 1000);
-    return () => {
-      clearInterval(intervalRef.current);
-      intervalRef.current = 0;
-    };
-  }, [state.isRunning]);
+  }, [status]);
+
+  const addLaps = () => {
+    setLaps([...laps, ...[timer]])
+  }
+ 
 
   return (
     <div>
       <h2>React Stop Watch</h2>
-      <h3>{state.timer}s</h3>
-      <button onClick={() => dispatch({ type: "start" })}>Start</button>
-      <button onClick={() => dispatch({ type: "stop" })}>Stop</button>
-      <button onClick={() => dispatch({ type: "reset" })}>Reset</button>
+      <div>{laps.length > 0 && laps.map(val => {
+        return (<p>{val}</p>)
+      })}</div>
+      <h3>{timer}s</h3>
+      <button onClick={() => setStatus(1)}>Start</button>
+      <button onClick={() => setStatus(2)}>Stop</button>
+      <button onClick={() => setStatus(3)}>Reset</button>
+      <button onClick={() => addLaps()}>Lapse</button>
     </div>
   );
 }
