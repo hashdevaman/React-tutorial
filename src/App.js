@@ -8,8 +8,6 @@ const initialState = {
 
 // Adding reducer function
 const reducer = (state, action) => {
-  // console.log("action here", action);
-
   switch (action.type) {
     case "start":
       return { ...state, isRunning: true };
